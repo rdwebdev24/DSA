@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <stack>
 #include "Fuck.h";
 using namespace std;
 
@@ -373,7 +374,6 @@ void inorderTraversal2(binaryTree<int> *root, vector<int> &arr, int k)
      }
 }
 
-
 vector<int> inorderTraversal(binaryTree<int> *root, int k)
 {
      vector<int> arr;
@@ -381,33 +381,199 @@ vector<int> inorderTraversal(binaryTree<int> *root, int k)
      return arr;
 }
 
+void postorder_iterative(binaryTree<int> *root)
+{
 
-int maxdepth(binaryTree<int> *root){
+     stack<binaryTree<int> *> s;
 
-     if(root==NULL){
+     while (root or !s.empty())
+     {
+          if (root)
+          {
+               if (root->right)
+               {
+                    s.push(root->right);
+               }
+               if (root->left)
+               {
+                    root = root->left;
+               }
+               else
+               {
+                    cout << root->data;
+                    root = root->left;
+               }
+          }
+          else
+          {
+               root = s.top();
+               s.pop();
+          }
+     }
+}
+
+int minDepth(binaryTree<int> *root)
+{
+     if (root == NULL)
+     {
           return 0;
      }
+     int right = 1 + minDepth(root->right);
+     int left = 1 + minDepth(root->left);
 
-     int left = 1+maxdepth(root->left);
-     int right = 1+maxdepth(root->right);
-     int m = max(left,right);
-     return m;
+     if (left == 1 and right != 1)
+     {
+          left = INT_MAX;
+     }
+     if (right == 1 and left != 1)
+     {
+          right = INT_MAX;
+     }
+
+     return min(left, right);
 }
+
+pair<int, int> balanced_tree_helper(binaryTree<int> *root)
+{
+     if (root == NULL)
+     {
+          pair<int, int> p = {0, 0};
+          return p;
+     }
+
+     int right = 1 + balanced_tree_helper(root->right).second;
+     int left = 1 + balanced_tree_helper(root->left).first;
+     pair<int, int> p = {left, right};
+
+     return p;
+}
+
+bool balancedTree(binaryTree<int> *root)
+{
+     pair<int, int> p = balanced_tree_helper(root);
+     cout << "pair : " << endl;
+     cout << p.first << p.second << endl;
+     int diff = abs(p.first - p.second);
+     if (diff > 1)
+     {
+          return false;
+     }
+     return true;
+}
+
+void INORDER(binaryTree<int> *root)
+{
+     if (root == NULL)
+     {
+          return;
+     }
+     INORDER(root->left);
+     cout << root->data << " ";
+     INORDER(root->right);
+}
+void PREORDER(binaryTree<int> *root)
+{
+     if (root == NULL)
+     {
+          return;
+     }
+     cout << root->data << " ";
+     PREORDER(root->left);
+     PREORDER(root->right);
+}
+void POSTORDER(binaryTree<int> *root)
+{
+     if (root == NULL)
+     {
+          return;
+     }
+     POSTORDER(root->left);
+     POSTORDER(root->right);
+     cout << root->data << " ";
+}
+void LEVELORDER(binaryTree<int> *root)
+{
+     queue<binaryTree<int> *> q;
+     q.push(root);
+     cout << root->data << " ";
+     while (!q.empty())
+     {
+          binaryTree<int> *front = q.front();
+          q.pop();
+          if (front->left and front->right)
+          {
+               cout << front->left->data << " " << front->right->data << " ";
+               q.push(front->left);
+               q.push(front->right);
+          }
+     }
+     return;
+}
+
+
+bool help(binaryTree<int>* root){
+     vector<binaryTree<int>*> arr;
+     // symmetric(root,arr);
+     for(auto i:arr){
+          cout<<i->data<<" ";
+     }
+     cout<<endl;
+     arr.pop_back();
+     stack<int> s;
+     for(int i=0; i<arr.size(); i++){
+          if(i<arr.size()/2){
+               s.push(arr[i]->data);
+          }
+          else{
+               if(s.top()!=arr[i]->data){
+                    return false;
+               }
+               s.pop();
+          }
+     }
+     return true;
+}
+
+vector<binaryTree<int>*> symmetric(binaryTree<int> *root,vector<binaryTree<int>*> &arr)
+{
+          if (root == NULL)
+          {
+               vector<binaryTree<int>*> arr;
+               return arr;
+          }
+          symmetric(root->left,arr);
+          symmetric(root->right,arr);
+          arr.push_back(root);
+          return arr;
+}
+
 
 int main()
 {
      system("cls");
 
      binaryTree<int> *root = takeInput_binary_levelWise();
+     cout<<endl;
      print_binary_tree(root);
-     inorder_traversal(root);
-     cout<<"max depth : "<<maxdepth(root);
+     cout<<"IN : ";INORDER(root);
+     cout<<endl;
+     cout<<"PRE : ";PREORDER(root);
+     cout<<endl;
+     cout<<"POST : ";POSTORDER(root);
+     cout<<endl;
+     cout<<"LEVEL : ";LEVELORDER(root);
+     cout<<endl;
+
+     vector<binaryTree<int>*> arr;
+     symmetric(root,arr);
+
+     for(auto i:arr){
+          cout<<i->data<<" ";
+     }
 
      delete root;
 
      return 0;
 }
-// 1 2 3 4 5 6 7 -1 -1 -1 -1 8 9 -1 -1 -1 -1 -1 -1
-// 1 3 2 3 4 0 2 5 6 0 0
 
 // 1 2 2 3 4 4 3 -1 -1 -1 -1 -1 -1 -1 -1
