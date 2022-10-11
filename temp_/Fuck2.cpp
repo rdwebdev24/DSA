@@ -547,33 +547,229 @@ vector<binaryTree<int>*> symmetric(binaryTree<int> *root,vector<binaryTree<int>*
           return arr;
 }
 
+int searchBT(binaryTree<int>* root,int k){
+
+     if(root==NULL) return -1;
+     if(root->data==k) return root->data;
+
+     if(root->data>k) searchBT(root->left , k);
+     else if(root->data<k) searchBT(root->right, k);
+     else{};
+}
+
+void printRangeBT(binaryTree<int>* root, int min, int max){
+     if(min==max) cout<<min;
+     if(min>max) swap(min,max);
+     if(root==NULL) return;
+     if(root->data>=min) printRangeBT(root->left,min,max);
+     printRangeBT(root->right,min,max);
+     if(root->data>=min and root->data<=max) cout<<root->data<<" ";
+}
+
+int maximumBT(binaryTree<int>* root){
+     if(root==NULL) return INT_MIN;
+     return max(root->data,max(maximumBT(root->left),maximumBT(root->right)));
+}
+int minimumBT(binaryTree<int>* root){
+     if(root==NULL) return INT_MAX;
+     return min(root->data,min(minimumBT(root->left),minimumBT(root->right)));
+}
+
+bool isBT(binaryTree<int>* root){
+     if(root==NULL) return true;
+     int leftMax = maximumBT(root->left);
+     int rightMin = minimumBT(root->right);
+     bool output = root->data>leftMax and root->data<=rightMin and isBT(root->left) and isBT(root->right);
+     return output;
+}
+
+
+class IsBSTReturn{
+     public:
+     bool isBST;
+     int minimum;
+     int maximum;
+};
+
+IsBSTReturn isBST2(binaryTree<int>* root){
+     if(root==NULL){
+         IsBSTReturn output;
+         output.isBST = true;
+         output .minimum = INT_MAX;
+         output .maximum = INT_MIN;
+         return output;
+     }
+     IsBSTReturn leftOutput = isBST2(root->left);
+     IsBSTReturn rightOutput = isBST2(root->right);
+
+     int minimun = min(root->data,min(leftOutput.minimum,rightOutput.minimum));
+     int maximum = max(root->data,max(leftOutput.maximum,rightOutput.maximum));
+
+     bool isBSTFinal = (root->data > leftOutput.maximum) and (root->data <= rightOutput.minimum) and leftOutput.isBST and rightOutput.isBST;
+
+     IsBSTReturn output;
+     output.minimum = minimun;
+     output.maximum = maximum;
+     output.isBST = isBSTFinal;
+
+     return output;
+}
+
+bool isBST3(binaryTree<int>* root,int min=INT_MIN , int max=INT_MAX){
+     if(root==NULL) return true;
+     if(root->data<min or root->data > max) return false;
+
+     bool isLeftOK = isBST3(root->left,min,root->data-1);
+     bool isRightOK = isBST3(root->right,root->data,max);
+     return (isLeftOK and isRightOK);
+}
+
+binaryTree<int>* ArrayToBST(int arr[], int start, int end){
+     if(start>end) return NULL;
+     int mid = (start+end)/2;
+     binaryTree<int>* root = new binaryTree<int>(arr[mid]);
+     root->left = ArrayToBST(arr,start,mid-1);
+     root->right = ArrayToBST(arr,mid+1,end);
+     return root;
+}
+
+class Node{
+     public:
+     Node* next;
+     int data;
+     Node(int val){this->data = val;next = NULL;}
+};
+
+
+void bst_to_ll_helper(binaryTree<int>* root, vector<int>& arr){
+     if(root==NULL) return;
+
+     bst_to_ll_helper(root->left,arr);
+     arr.push_back(root->data);
+     bst_to_ll_helper(root->right,arr);
+
+}
+
+Node* BST_to_LL2(binaryTree<int>* root){
+     vector<int> arr;
+     bst_to_ll_helper(root,arr);
+
+     Node* head = new Node(arr[0]);
+     Node* temp = head;
+     for(int i = 1; i<arr.size(); i++){
+          Node* ele = new Node(arr[i]);
+          temp->next = ele;
+          temp = ele;
+     }
+     return head;
+}
+
+Node* BST_to_LL(binaryTree<int>* root){
+     if(root==NULL) return NULL;
+
+     Node* left = BST_to_LL(root->left);
+     Node* right = BST_to_LL(root->right);
+     Node* node = new Node(root->data);
+
+     Node* temp = left;
+     while(temp!=NULL and temp->next!=NULL) temp = temp->next;
+     if(temp!=NULL) temp->next = node;
+     node->next = right;
+
+     if(left==NULL) return node;
+     return left;
+}
+
+void printLL(Node* head){
+     while(head!=NULL) 
+     {
+     cout<<head->data<<"->";
+     head=head->next;
+     }
+     cout<<"NULL"<<endl;
+}
+
+void BT_to_LL_helper(treeNode<int>* root, vector<int>& arr){
+     if(root==NULL) return;
+     arr.push_back(root->data);
+     for (int i = 0; i < root->children.size(); i++){
+      BT_to_LL_helper(root->children[i],arr);
+     }
+}
+
+Node* BT_to_LL(treeNode<int>* root){
+     vector<int> arr;
+     BT_to_LL_helper(root,arr);
+     for(auto i:arr){
+          cout<<i<<" ";
+     }
+     Node* head = new Node(arr[0]);
+     Node* temp = head;
+     for(int i=0; i<arr.size(); i++){
+          Node* node = new Node(arr[i]);
+          temp->next = node;
+          temp = node;
+     }
+     return NULL;
+}
+
+void path_helper(binaryTree<int>* root, vector<int>& arr,int target, bool &ans){
+     if(root==NULL) return;
+     if(ans) arr.push_back(root->data);
+     if(root->data==target) ans=false;
+     path_helper(root->left,arr, target,ans);
+     path_helper(root->right,arr, target,ans);
+     if(ans) arr.pop_back();
+}
+
+vector<int> Path_to_Node(binaryTree<int>*root,int target){
+     vector<int> arr;
+     bool ans = true;
+     path_helper(root,arr,target,ans);
+     return arr;
+}
+
+vector<int>* Path_to_Node2(binaryTree<int>* root, int target){
+     if(root==NULL) {return NULL;}
+
+     if(root->data==target) {
+          vector<int>* arr = new vector<int>();
+          arr->push_back(root->data);
+          return arr;
+     }
+     vector<int>* leftOutput = Path_to_Node2(root->left,target);
+     if(leftOutput!=NULL){
+          leftOutput->push_back(root->data);
+          return leftOutput;
+     }
+     vector<int>* rightOutput =Path_to_Node2(root->right,target);
+     if(rightOutput!=NULL){
+          rightOutput->push_back(root->data);
+          return rightOutput;
+     }else {return NULL;}
+}
 
 int main()
 {
      system("cls");
-
      binaryTree<int> *root = takeInput_binary_levelWise();
-     cout<<endl;
+     cout<<endl; 
      print_binary_tree(root);
-     cout<<"IN : ";INORDER(root);
-     cout<<endl;
-     cout<<"PRE : ";PREORDER(root);
-     cout<<endl;
-     cout<<"POST : ";POSTORDER(root);
-     cout<<endl;
-     cout<<"LEVEL : ";LEVELORDER(root);
-     cout<<endl;
 
-     vector<binaryTree<int>*> arr;
-     symmetric(root,arr);
-
-     for(auto i:arr){
-          cout<<i->data<<" ";
-     }
-
-     delete root;
+     // cout<<"IN : ";INORDER(root);
+     // cout<<endl;
+     // cout<<"PRE : ";PREORDER(root);
+     // cout<<endl;
+     // cout<<"POST : ";POSTORDER(root);
+     // cout<<endl;
+     // cout<<"The element is : "<<searchBT(root,75);
+     // delete root;
 
      return 0;
 }
 
 // 1 2 2 3 4 4 3 -1 -1 -1 -1 -1 -1 -1 -1
+
+// 4 2 6 1 3 5 7 -1 -1 -1 -1 -1 -1 -1 -1
+
+// 1 2 2 5 2 3 4 1 6 0 0 0

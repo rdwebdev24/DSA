@@ -2911,7 +2911,28 @@ int celebrity(vector<vector<int>> &M, int n)
 int main()
 {
     system("cls");
+    vector<int> arr(26,0);
+    string s = "";
+    int k=3;
+    int cnt=0;
+    int ans=0;
+    for(int i=0; i<s.size(); i++){
+        arr[s[i]-'a']++;
+        if(i>=k-1){
+            cnt=0;
+            arr[s[i-k]-'a']--;
+            for(auto i:arr){
+                if(i){
+                    cnt++;
+                }
+            }
+            if(cnt==k-1){
+                ans++;
+            }
+        }
+    }
 
+    cout<<"ans : "<<ans;    
 
     return 0;
 }
